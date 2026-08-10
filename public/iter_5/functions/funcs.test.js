@@ -10,7 +10,7 @@ Math.random = () => 0
 test('createLayer()', () => {
     // normal conditions
     expect(func.createLayer(3, false, 2)).toEqual({
-        nodes: new Array(3).fill().map(() => {return {value: 0}}),
+        nodes: [{value: 0}, {value: 0}, {value: 0}],
         inputLayer: false,
         prevLayerIndex: 2,
         weightMatrix: null,
@@ -43,4 +43,31 @@ test('createLayer()', () => {
         weightMatrix: null,
         bias: null
     })
+})
+
+test('createNetwork()', () => {
+    // normal conditions
+    expect(func.createNetwork([2, 2, 2])).toEqual([
+        {
+            nodes: [{value: 0}, {value: 0}],
+            inputLayer: true,
+            prevLayerIndex: null,
+            weightMatrix: null,
+            bias: null
+        },
+        {
+            nodes: [{value: 0}, {value: 0}],
+            inputLayer: false,
+            prevLayerIndex: 0,
+            weightMatrix: null,
+            bias: null
+        },
+        {
+            nodes: [{value: 0}, {value: 0}],
+            inputLayer: false,
+            prevLayerIndex: 1,
+            weightMatrix: null,
+            bias: null
+        }
+    ])
 })
