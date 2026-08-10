@@ -1,0 +1,65 @@
+create network
+input: dimensions (array)
+output: network (array)
+network = []
+for index in dimensions
+    dimension = dimensions[index]
+    inputLayer = index === 0
+
+    network.push(createLayer(dimension, inputLayer, prevNodeIndx = index-1))
+output network
+
+create layer
+inputs:
+- dimension (integer)
+- inputLayer (boolean)
+- prevNodeIndx (integer)
+output: layer (object)
+
+layer = {
+    nodes: [] with (dimension) number of nodes,
+    inputLayer,
+    prevNodeIndx: inputLayer? null: prevNodeIndx
+    bias: null,
+    weight matrix: null
+}
+
+output layer
+
+initialise weights and biases of one layer
+inputs:
+layer dimensions (integer)
+previous layer dimensions (integer)
+input layer (boolean)
+
+outputs:
+bias (integer)
+weight matrix (matrix)
+
+if input layer is true, throw an error: the input layer does not have weights or a bias
+otherwise
+make a 2D array of zeroes, height (num arrays): layer dimensions, width (size of each array): previous layer dimensions
+turn it into a matrix
+
+make a bias with value 0?
+
+output weight matrix and bias
+
+
+initialise weights and biases of whole network
+input: network (array)
+output: new network (array)
+
+new network = copy(network)
+for index = 1 in new network
+    layer = new network [index]
+    layer dimensions = layer.nodes.length
+    prevLayer = new network [index-1]
+    prevLayer dimensions = prevLayer.nodes.length
+    weightMatrix, bias = initialise weights and bias of one layer (layer dimensions, prevLayer dimensions, layer.inputLayer)
+
+    // at this point the previous function should have already done the input validation to confirm we're not working with an input layer.
+    layer.weightMatrix = weightMatrix
+    layer.bias = bias
+
+output new network
