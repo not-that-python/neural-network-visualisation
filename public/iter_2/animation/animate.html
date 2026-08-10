@@ -1,0 +1,69 @@
+<!doctype html>
+<title>Animations</title>
+<canvas id="canvas" width="500" height="300" style="border: 1px black solid;"></canvas>
+<script>
+let ctx = canvas.getContext('2d')
+
+let balls = [
+  { x: 5, y: 10 },
+  { x: 100, y: 200 }
+]
+
+// ver 1: balls are animated at the same time, but each animatino happens one after another.
+// moveBall1()
+// moveBall2()
+
+// ver 2: balls are animated one after another, and each ball's animation hapens one after another too.
+async function animateBalls() {
+    await moveBall1()
+    await moveBall2()
+
+}
+animateBalls()
+
+async function animate (obj, to, duration) {
+  return new Promise(resolve => {
+    obj.animate = {
+      start: Date.now(),
+      duration,
+      from: { x: obj.x, y: obj.y },
+      to,
+      resolve
+    }
+  })
+}
+
+async function moveBall1 () {
+  await animate(balls[0], { x: 50, y: 100 }, 1000)
+  await animate(balls[0], { x: 250, y: 50 }, 2000)
+}
+
+async function moveBall2 () {
+  await animate(balls[1], { x: 50, y: 100 }, 1500)
+  await animate(balls[1], { x: 400, y: 200 }, 1500)
+}
+
+setInterval(() => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  // update state
+  let now = Date.now()
+  for (let ball of balls) {
+    if (ball.animate) {
+      let pct = Math.min(1, (now - ball.animate.start) / ball.animate.duration)
+      let { from, to, resolve } = ball.animate
+      ball.x = from.x + (to.x - from.x) * pct
+      ball.y = from.y + (to.y - from.y) * pct
+      if (pct >= 1) {
+        ball.animate = null
+        resolve()
+      }
+  }
+}
+
+  // draw state
+  for (let ball of balls) {
+    ctx.fillRect(ball.x, ball.y, 10, 10)
+  }
+}, 1000/60)
+</script>

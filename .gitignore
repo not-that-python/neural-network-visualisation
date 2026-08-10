@@ -1,0 +1,14 @@
+# ignore Word backup files that start ~$
+~$*
+
+# ignore infuriating WSL Zone.Identifer files see https://github.com/microsoft/WSL/issues/7456
+*.Identifier
+
+# ignore npm/node modules
+node_modules
+# and vite
+*.vite/
+assets
+
+diary.txt
+# thats private

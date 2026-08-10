@@ -1,0 +1,22 @@
+/* body {background-color: chartreuse;} */
+canvas {background-color: black;}
+button {
+    /* float: left; */
+    font-size: 25px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+}
+#hoverElem {
+    /* float: right; */
+    font-size: 30px;
+    /* position: absolute; */
+    /* position: relative;
+    left: 1000px; */
+}
+#info {
+    position: relative;
+}
+/* #canvasDiv {
+    position: absolute;
+} */

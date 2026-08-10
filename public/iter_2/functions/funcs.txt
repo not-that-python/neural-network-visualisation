@@ -1,0 +1,298 @@
+notes:
+- nodes do not need to "know" what the previous layer is. this is determined by the layer it is in already.
+- each node no longer needs it's own weight matrix. the weight matrix will be used "by" an individual layer to simultaneously calculathe the weighted sums for it's own nodes. for now, rather than a proper matrix, my weight matrix of my second layer will jsut be a 2D array.
+
+since nodes no longer need to "know" their own weight matrix or the index of the previous node, all they need to "know" is their own value and their position.
+
+refactoring createNetwork and creating createLayuer
+
+createLayer
+inputs:
+numNodes (integer)
+inputLayer? (boolean)
+prevLayerIndx=null (integer)
+numPrevNodes=null (integer)
+output:
+layer (object)
+
+return {
+  nodes:[{value:0}repeated numNodes times] ,
+  inputLayer,
+  prevLayerIndx: inputLayer? null: prevLayerIndx,
+  numPrevNodes: inputLayer? null: numPrevNodes,
+  weights: [[one random number]] // is a 2D array to simulate being a 2D matrix and simulate use of indices to iterate
+}
+
+createNetwork
+inputs:
+dimensions (array of integers: length of array = number of layers, each integer = number of nodes in each layer)
+output: network (array)
+network = []
+
+// first, append input layer
+network.push(createLayer(dimensions[0], true))
+
+// then append everything else:
+for i=1 to dimensions.length-1:
+    network.push(createLayer(dimensions[i], false, i-1, dimensions[i-1]))
+
+return network
+
+then refactor the way everything else interacts with the network
+
+calculating location:
+replace calculateX and calculateY with one function:
+calculateOrdinate
+inputs:
+span (int) replaces height/width
+padding (int)
+numItems (int)
+whichItem (int)
+output: ordinate (float / int idk)
+
+may re-introduce calculateY to change the way the y-ordinate is calculated:
+calculateY
+inputs:
+height (int)
+yPadding (int)
+numItems (int)
+whichItem (int)
+maxItems (int)
+output: y (float / int)
+
+networkHeight = height - 2(yPadding)
+4 cases:
+maxItems even, numItems even
+maxItems even, numItems odd
+maxItems odd, numItems odd
+maxItems odd, numItems even
+
+if both items have the same parity all that needs to be done is increase the width
+first of all, it may be worth calculating the distance between each node rather than immediately finding its own position. that way, if they differ in parity, you can move that layer up or down by half that distance.
+if the network has a height of x, and there are n maximum nodes, there are n-1 gaps between those nodes, meaning that distance equals x / n-1
+
+networkSpan = span - 2(padding)
+location = whichItem - 1 / numItems - 1
+ordinate = padding + (networkSpan * location)
+return ordinate
+
+draw functions
+
+drawNetwork
+inputs: network, width, height
+outputs:
+
+networkPaddingX = e.g. 100
+networkPaddingY = e.g. 50
+numLayers = len(network)
+
+// assign positions
+for i of numLayers:
+    whichLayer = i+1
+    x = calculateX(width, networkPaddingX, numLayers, whichLayer)
+
+    curLayer
+    numNodes = curLayer.nodes.length
+    for j of numNodes:
+        whichNode = j+1
+        y = calculateY(height, networkPaddingY, numNodes, whichNode)
+        network[i].nodes[j].x = x
+        network[i].nodes[j].y = y // assignPos may no longer be needed
+
+// draw connections
+for i=1 of numLayers:
+    // drawing connections starting from the second layer, as inputLayer has no previous layer to connect to
+
+    weightMat = network[i].weights
+    
+    curLayer = network[i]
+    prevLayer = network[i-1]
+
+    // first, iterate over current layer to draw from each node
+    for j in curLayer.length:
+        node = curLayer[j]
+        startX, startY = node.x, node.y
+
+        // then, iterate over previous layer
+        // TO DO: implement memoisation to reduce number of iterations (looping) in future iterations (dev)
+
+        for k in prevLayer.length:
+        prevNode = prevLayer[k]
+        endX, endY = prevNode.x, prevNode.y
+
+        // use indices to get relevant weight
+        weight = weightMat[k][j]
+
+        drawConnection(startX, startY, endX, endY, weight,  whatever)
+
+// draw nodes
+for i of numLayers:
+    curLayer = network[i]
+    for j of curLayer.length:
+    
+    curNode = curLayer[j]
+    drawNode(node.value, node.x node.y, radius, whatever)
+
+just for reference and parameters, going to copy and paste drawNode and drawConnection and whatnot over here
+
+
+drawNode
+
+inputs:
+x (float),
+y (float),
+value (float),
+radius (float)
+
+output:
+
+ctx.beginPath();
+ctx.arc(x, y, radius, 0, 2 * Math.PI);
+ctx.fillStyle = `rgb(${value*255}, ${value*255}, ${value*255})`;
+ctx.fill();
+ctx.lineWidth = 1;
+ctx.strokeStyle = "black";
+ctx.stroke();
+
+drawConnection
+
+inputs:
+startX (float),
+startY (float),
+endX (float),
+endY (float),
+weight
+
+outputs:
+
+ctxbeginPath()
+ctx.moveTo(startX, startY)
+ctx.lineTo(endX, endY)
+
+ctx.lineWidth = weight
+ctx.strokeStyle = rgb(weight*255, weight*255, weight*255)
+
+ctx.stroke()
+
+animation (SC3)
+
+animateProperty
+inputs:
+startVal (float)
+endVal (float)
+warpedTime (float) (may come from global state and may not be a parameter)
+startTime (float)
+duration (float) (no.miliseconds affected by speed)
+outputs:
+curVal (float)
+
+// if the duration of the animation is up, snap to the new value it should be
+if warpedTime >= startDate + duration:
+    return endVal
+
+// otherwise, continue as normal
+timePassed = warpedTime - startDate
+difference = endVal - startVal
+pct = timePassed / duration
+
+return startVal + (difference * pct)
+
+input sanitisation? startVal and endVal can be negative. duration must be greater than 0, but there is unlikely to be a situation where 0 duration is given. startTime and warpedTime must be at least 0, but that's also unlikely ever to change.
+
+animation implemented from spike test after the unpromisificatino of the animation function
+functions needed:
+an animate function that creates an animation object and pushes it to the relevant animation list based on layer
+( this animation object will need to know the indices of whatever it's animating )
+an animateLayer function, which will return a promise
+an animateAll function, may be redundant
+
+animate
+from (float)
+to (float)
+duratino (no. miliseconds)
+warpedTime (number, not exactly no. miliseconds)
+relevant indices (tuple)
+updateWeight? (may not be necessary)
+output:
+animation object
+(will not be immediately pushed to animation list, to reduce side effects)
+
+return {
+    start: warpedTime,
+    duration,
+    from,
+    to,
+    relevantIndices
+
+}
+
+animateLayer
+inputs:
+to (array, may be 2D depending on updateWeight)
+duration (no. milliseconds)
+layerIndx (int)
+updateWeight? (may not be needed if relevant indices are being used)
+warpedTime
+relevane indices (tuple)
+
+return Promise( async (resolve) => {
+    layer = network[layerIndx]
+    
+    if updateWeights:
+        // iterate through weight matrix and feed the relevant indices into the animation objects
+
+        for a of length(weightMat)
+            for b of length(weightMat[a])
+                relevantIndices= ['weight', a, b]
+                layer.animations.push(animate(yada yada))
+    else:
+        // iterate through list of nodes and feed the relevant indices into the animation object
+        for j of length(nodes)
+            relevantIndices = ['nodes', j, 'value']
+            layer.animations.push(animate(yada yada))
+    
+    // while loop to delay resolving promise goes here
+    while true {
+        if (all of layer.animations === null) {
+            layer.animatinos = []
+            break
+        }
+        await sleep (1)
+    }
+
+    // resolve promise
+    resolve()
+    
+})
+
+updateState
+input:
+network
+output:
+newNetwork(?) (would make sense, to maintain modularity)
+
+iterate through the network, and then for each layer, check if the animation list has any length. if it does, iterate through the list. if not, don't make any changes and move on to the next layer (due to animations being replaced with null, each animation will also have to be checked for existing and truthiness.) use animateAttribute. based on the current way of things, animation objects should already have the correct indices for updating either weights or nodes.
+
+for i in length(network) {
+    layer = network[i]
+    if (layer.animations.length) {break} // may be better than nesting
+
+    for j in layer.animations.length {
+        let animation = layer.animations[j]
+        if animation {
+            network[indx1][indx2][indx3], finished = animateAttribute(whatever)
+
+            if finished {layer.animations[j] = null}
+        }
+    }
+}
+
+defining tthe tuple of indices
+if updateWeight:
+value = network[i].weights[a][b]
+or
+network[i]['weights'][a][a]
+else:
+value = network[i].nodes[j].value
+or
+network[i]['nodes'][j]['value']

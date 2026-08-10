@@ -1,0 +1,158 @@
+<!doctype html>
+<title>Animations</title>
+<canvas id="canvas" width="500" height="300" style="border: 1px black solid; background-color: black;"></canvas>
+<script>
+    let ctx = canvas.getContext('2d')
+
+    let balls = [
+        {
+            objs: [{x: 100, y: 100, value: 0}, {x: 100, y: 200, value: 0}],
+            animations: new Array(2)
+        },
+        {
+            objs: [{x: 200, y: 100, value: 0}, {x: 200, y: 200, value: 0}],
+            animations: new Array(2)
+        },
+    ]
+
+    function drawLoop() {
+
+        // clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // update state
+        let now = Date.now()
+        for (let i=0; i<balls.length; i++) {
+            let objs = balls[i].objs
+            for (let j=0; j<objs.length; j++) {
+                let ball = objs[j]
+
+                // uses old animate
+                // if (ball.animate) {
+
+                //     let finished
+                //     [balls[i].objs[j].value, finished] = animateAttribute(ball.animate.from, ball.animate.to, ball.animate.start, ball.animate.duration, now)
+
+                //     if (finished) {
+                //         let resolve = ball.animate.resolve
+                //         ball.animate = null
+                //         resolve()
+                //     }
+                // }
+
+                // uses new animate
+                if (balls[i].animations[j]) {
+                    let animate = balls[i].animations[j]
+
+                    let finished
+                    [balls[i].objs[j].value, finished] = animateAttribute(animate.from, animate.to, animate.start, animate.duration, now)
+
+                    if (finished) {
+                        let resolve = animate.resolve
+                        balls[i].animations[j] = null
+                        resolve()
+                    }
+                }
+            }
+        }
+
+        // draw state
+        for (let i=0; i<balls.length; i++){
+            let objs = balls[i].objs
+            for (let ball of objs) {
+                drawNode(ctx, ball.x, ball.y, ball.value, 10)
+            }
+        }
+
+        // call self
+        requestAnimationFrame(drawLoop)
+    }
+    requestAnimationFrame(drawLoop)
+    // animateBall(0, 0)
+    // animateBall(0, 1)
+    // animateBall(1, 0)
+    newAnimateAll()
+    
+
+    async function newAnimateAll() {
+        await newAnimateBall(0, 0)
+        await newAnimateBall(0, 1)
+        await newAnimateBall(1, 0)
+        await newAnimateBall(1, 1)
+        
+    }
+
+
+
+
+
+
+    // functions
+    function drawNode(ctx, x, y, value, radius) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgb(${value*255}, ${value*255}, ${value*255})`;
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+    }
+
+    function animateAttribute(startVal, endVal, startTime, duration, warpedTime) {
+
+        // if duration is up, snap to the endVal
+        if (warpedTime >= startTime + duration) {
+            return [endVal, true]
+        }
+
+        // otherwise, continue as normal
+        let timePassed = warpedTime - startTime
+        let difference = endVal - startVal
+        let pct = timePassed / duration
+
+        return [startVal + (pct * difference), false]
+    }
+
+    // copy/pasted animation function
+    async function animate (obj, to, duration) {
+        return new Promise(resolve => {
+            obj.animate = {
+            start: Date.now(),
+            duration,
+            from: obj.value,
+            to,
+            resolve
+            }
+        })
+    }
+
+    // new animation function
+    // pushes animations to the animation list rather than assigns them to the ball itself
+    async function newAnimate(objIndx, to, duration, layerIndx) {
+        return new Promise(resolve => {
+            let obj = balls[layerIndx].objs[objIndx]
+            balls[layerIndx].animations[objIndx] = {
+                start: Date.now(),
+                duration,
+                from: obj.value,
+                to,
+                resolve
+            }
+            console.log(`layer ${layerIndx}:`)
+            console.log(balls[layerIndx])
+        })
+    }
+
+    async function animateBall(a, b) {
+        console.log('amnimating')
+        await animate(balls[a].objs[b], 0.5, 1000)
+        await animate(balls[a].objs[b], 0.5, 1000)
+        await animate(balls[a].objs[b], 0, 1000)
+    }
+
+    async function newAnimateBall(layerIndx, objIndx) {
+        await newAnimate(objIndx, 0.5, 1000, layerIndx)
+        await newAnimate(objIndx, 0.5, 1000, layerIndx)
+        await newAnimate(objIndx, 0, 1000, layerIndx)
+    }
+</script>

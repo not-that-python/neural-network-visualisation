@@ -1,0 +1,187 @@
+sub-criteria
+  - SC1.1 there are two nodes
+  - SC1.2 the nodes are connected
+  - SC1.3 for each node, draw a circle
+  - SC1.4 the greyscale values of the circles are based on the values fo the nodes
+  - SC1.5 there is a connection drawn between the circles
+  - SC1.6 the greyscale value of the connection is based on the weight of the connection
+
+SC1.1 and 1.2
+
+createNode
+inputs: inputNode=false, prevNodeIndx=None
+outputs: node
+
+return: {
+    id,
+    value: 0,
+    inputNode,
+    prevNodeID,
+    weight: random()
+}
+
+createNetwork
+inputs:
+outputs: network
+network = []
+network.push(createNode(first node))
+network.push(createNode(second node))
+return network
+
+reason for network being an array:
+in future instead of nodes, the network will be a list of layers. being an array allows the network to know the order in which each layer goes, rather than an id of 1st, 2nd, 3rd etc.
+
+SC1.3 and 1.4
+
+drawNode
+inputs: node, radius
+output:
+ctx.beginPath();
+ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
+ctx.fillStyle = `rgb(${value*255}, ${value*255}, ${value*255})`;
+ctx.fill();
+ctx.lineWidth = 1;
+ctx.strokeStyle = "black";
+ctx.stroke();
+
+calculateX
+inputs: networkPadding, numNodes, whichNode
+output: x
+networkArea = canvas.width - 2(networkPadding)
+fraction = whichNode - 1 / numNodes - 1 (minus one is to account for first and last node e.g. 3 nodes, 1st node is at 0, 2nd node is 1/2, 3rd node is all the way)
+x = networkPadding + canvas.width + (networkArea * location)
+return x
+
+calculateY
+inputs:
+output: y
+return canvas.height / 2
+
+reason for calculateX and calculateY: rather than hard-coding the locations of the nodes, this function is to account for later iterations when more layers and more nodes will be created, to make it easier to define a node's location
+
+drawNetwork
+inputs: network
+outputs:
+
+networkPadding = idk like 100 or sm
+numNodes = len(network)
+for i of numNodes:
+    whichNode = i
+    x = calculateX(networkPadding, numNodes, whichNode, width)
+    y = calculateY(height)
+    drawNode(node, radius, x, y)
+
+reason for drawNetwork: previously, createNetwork required width and height to calculate the x and y pos of each of it's node. however, if i plan to change the canvas width and height to match screen resizing in future, then the width and height may have to be constantly updated, and if createNetwork requires both then the network will have to be constantly recreated. to prevent this, drawNetwork has been created so that the network only has to be created once, and it may be redrawn multiple times over.
+
+This also means that each node no longer holds it's own position. As of now, I don't foresee any issues with this, if each node's position has to be calculated based on properties of the node.
+
+SC 1.5
+
+drawConnection
+inputs: startX, startY, endX, endY, weight
+outputs:
+
+ctxbeginPath()
+ctx.moveTo(startX, startY)
+ctx.lineTo(endX, endY)
+
+ctx.lineWidth = weight
+ctx.strokeStyle = rgb(weight*255, weight*255, weight*255)
+
+ctx.stroke()
+
+assignPos
+inputs: node, x, y
+outputs: newNode
+
+newNode = node.copy()
+newNode.x = x
+newNode.y = y
+
+return newNode
+
+reason for assignPos: when trying to draw the connection, the x and y had to be recalculated, and calculateX & calculateY had to be called again. So to keep the code DRY, I've decided that nodes can store their own positions again. But to avoid having to re-call createNode constantly, assignPos will be used to recalculate their positions.
+
+SC2
+
+SC2.1
+
+drawLoop
+credit to mathsuniverse.com/games
+let previousTime = 0
+
+inputs: currentTime
+outputs:
+deltaTime = currentTime - previousTime
+draw background
+update everythiung
+draw everything
+
+previousTime = currentTime
+requestAnimationFrame(drawLoop)
+
+testAnimationinputs: deltaTime, node
+output: newNode
+newNode = structuredClone(node)
+newNode.value = Math.random()
+return newNode
+
+testAnimation
+inputs: deltaTime, node
+output: newNode
+newNode = structuredClone(node)
+newNode.x += deltaTime
+return newNode
+
+animating:
+inspired by https://www.mathsuniverse.com/lmc/dev/08.html:  there can be a function calles updateNetwork which is constantly updating the network appropriately with the values it should be. This updating happens based on an "animation" object, which contains attributes, such as startVal, endVal, and duration (a number of miliseconds).
+
+There are two types of animation objects:node animations, and weight animations.
+
+In the website linked above, the speed at which the animation carries out is determined by the difference between the current datetime and the datetime when the animation started running. This is then taken as a fraction over the duration of the animation, to tell how far along we are in the animation, like a percentage of how far we are through.
+
+updateNetwork is being called all of the time. the animations change when a function animateNode or animateWeight is called. This will be called separately outside of the drawLoop function.
+
+updateNetwork:
+inputs: animations (list), network (list)
+outputs: newNetwork
+newNetwork = structuredClone(network)
+
+for animation in animations:
+  node index = animation.nodeindex
+  node = newNetwork[node index]
+
+  if animating a node:
+    // change node.value
+    updateValueProperty(node, false, animation)
+    
+  else if animating a weight:
+    // change node.weight
+    do the same thing but to the weight
+return newNetwork
+
+updateValueProperty:
+input: node, updateWeight?, animation
+outputs: newNode
+newNode = structuredClone
+
+timePassed = datetime.now - animation.startdate
+newNode.value = animation.startVal + (animation.endVal - animation.startVal) * (timePassed / animation.duration)
+
+return newNode
+
+creating animations
+
+newAnimation
+inputs(startVal, endVal, duration, nodeIndx, updateWeight=false)
+outputs: animation
+return {
+  startVal,
+  endVal,
+  duration,
+  nodeIndx,
+  startDate: Date.now(), // point of animation's creatino to keep track of duration
+  updateWeight
+}
+
+should have a global list of animations for all animation-related functions to keep track of

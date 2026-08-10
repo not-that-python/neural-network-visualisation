@@ -1,0 +1,204 @@
+emptyNetwork
+inputs: network
+outputs: none (animation function)
+
+for i = network.length-1 to 0:
+    animateLayer(network[i], 500ms, [all 0s], whatever)
+
+squaredError
+inputs:
+actual
+expected
+output:
+error
+return (actual - expected)**2
+
+d_squaredError
+return 2*(actual - expected)
+
+d_sigmoid
+return sigmoid(x) * (1 - sigmoid(x))
+
+findWeightedSums
+inputs:
+prevActivations
+weightMat
+biasVector
+output:
+ZVector
+
+let ZVector = tf.add(tf.matMul(weightMat, prevActivations), biasVector)
+return ZVector
+
+matMulElementWise
+inputs:
+matrix1
+matrix2
+output:
+result
+
+throw error if the shapes aren't equal (have to find out how to check if arrays are equal due to referencing errors)
+results = []
+for x in matrix1:
+    for y in matrix2:
+        results.push(x*y)
+
+return results
+
+findGoldenValues
+inputs:
+costActivationVector
+ZVector
+output:
+golvenValues
+
+first, apply the d_activation functino and map it to the ZVector. store it in something called e.g. activationZVector
+
+return matMulElementWise(costActivationVector, activationZVector)
+
+d_costWRTActivation
+inputs:
+weightMat (from layer above)
+goldenValues (from layer above)
+
+outputs:
+costActivationVector
+
+weightMat.transpose
+return weightMat x goldenValues
+
+d_costWRTweight
+inputs:
+weightMat
+activationVector (of layer before)
+goldenValues (of layer after)
+output:
+costWeightMatrix
+
+transpose activationVector so that its lying on its side, but the top value is still the first value (reading from left to right idk)
+costWeightMatrix = tf.matMul(goldenValues, activationVector)
+
+return tf.tensor(costWeightMatrix)
+
+d_costWRTbias
+inputs:
+goldenValues (of layer after)
+output:
+costBiasVector
+
+just sum the golden values
+
+findNewWeightMatrix
+inputs:
+weightMat
+costWeightMatrix
+learningRate
+
+multiply everything in the costWeightMatrix by the learning rate (maybe make a copy)
+
+return tf.add(weightMat, costWeightMatrix)
+
+firstGoldenValues
+inputs:
+firstZVector
+outputs
+expectedOutputs
+the above two must be vectors of the same size
+
+// first, get a vector of mean squared error using outputs and expectedOutputs
+
+// then, use the d_activation function and map it to the firstZVector to get firstActivationZVector
+
+then multiply the two element-wise.
+then return the result
+
+matricesAverage
+input:
+matrices (array of at least 2 matrices)
+output:
+avgMatrix (one matrix)
+
+let sum = add matrices[0] and matrices[1]
+if length(matrices) == 2
+return sum.mult_scalar(1/2)
+else:
+for i=2 to length(matrices):
+    sum = add matrices sum and matrices[i]
+
+return sum.mult_scalar(1/matrices.length)
+
+runNetwork
+inputs:
+batch size
+learning rate
+networkInputs
+expectedOutputs
+outputs: idk
+
+d_weightMatrices_training = []
+d_biases_training = []
+
+for i in batch size:
+    giveNetworkInputs(networkInputs[i])
+    forwardPropogation(network)
+
+    [d_weightMatrices, d_biases]backPropogation(network, expectedOutputs[i])
+
+    d_weightMatrices_training.push(d_weightMatrices)
+    d_biases_training.push(d_biases)
+
+// after training in batch size, calculate how much to adjust all the weights and biases by
+let finalWeightAdjusts = []
+let finalBiasAdjusts = []
+for j of d_weightMatrices_training[0].length:
+    finalWeightAdjusts.append(matrixAverage([d_weightMatrices_training[i][j] for i in d_weightMatrices_training.length]))
+
+for j of d_biases_training[0].length:
+    finalBiasAdjusts.append(average of [d_biases_training[i][j] for i in d_biases_training.length])
+
+in both finalWeightAdjusts and finalBiasAdjusts, multiply every value by -1 and then by the learning rate
+
+change the weights immediately as this has no visual effect
+
+to chaneg the weights, first determine what the new weight matrices (newWeightMatrices) by saying = weightMat + finalWeightAdjusts[i] for i in thingy (make sure you iterate correctly, considering the null value)
+and then using animateLayer going backwards, change the weights of the network
+
+
+
+backPropogation
+inputs:
+network
+expected
+outputs:
+array of weight gradient matrices
+array of bias gradients
+
+weight gradient matrices = []
+bias gradients = []
+
+frontGoldenValues = null
+for i=network.length to 1 (not 0):
+    get ZVector from network[i] (calculated using network[i-1] adn weight matrix of network[i])
+    // could theoretically use the inverse of the activation function? although thats kind of stupid
+    /
+    get C/a vector from network[i] (function used depends on frontGoldenValues === null)
+    as a result, get goldenValueVector from network[i]
+
+    // do weights
+    // will be the weight gradient matrix of weights in network[i]
+    get activationVector from network[i-1]
+    get weight derivative matrix using activationVector and golvenValueVector
+    push the weight derivative into the front of weight gradient matrices
+
+    // do bias
+    // (will be the bias derivative of bias in network[i-1])
+    get bias derivative from goldenValueVector
+    push the bias derivative into the front of the weight gradient matrices
+
+    at the end of this iteration frontGoldenValues  structuredClone(goldenValueVector)
+
+after the loop is finished:
+push a null into the end of the array fo bias gradients
+push a null into the front of the array of weight gradient matrices
+
+return the two arrays

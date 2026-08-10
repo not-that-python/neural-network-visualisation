@@ -1,0 +1,127 @@
+Collision
+Circle collision
+
+circleCollision
+inputs:
+x
+y
+(denote the position of the point)
+circleX
+circleY
+(denote the position of the centre of the circle to collide with)
+radius
+output:
+isColliding? (boolean)
+
+return (sqrt((circleX - x)^2 + (circleY - y)^2)) <= radius
+
+hoverNode
+inputs:
+nodeIndx
+node (probably jsut the whole entire object)
+mouseX
+mouseY
+outputs: nothing
+
+if (mouseX, mouseY, node.x, node.y, radius):
+    // radius is some arbitrary number as all nodes are the same size
+    console.log(nodeINdx has value node.value)
+
+hoverValues
+inputs:
+network
+mouseX
+mouseY
+outputs:
+
+for layer in network:
+    for node in layer:
+        hoverNode(node, mouseX, mouseY)
+
+
+idea to fix the issue
+outside of iterating through the layers, there is a big list of every hover value. only on of these will not be false, so these will all be checked for being false. if its false, it wont be appended to the list, otherwise a tuple will be appended. after the list is full, an if statement will check the length of the list. if there is at least one item in that list, then based on whats in the tuple, the inner text of the element will be decided.
+
+forward propogation
+
+calculateActivations
+inputs:
+prevActivations (tensor (nx1) (yxx))
+weightMat (tensor (nxm))
+activationFunc=sigmoid (by default)
+output: curActivations
+
+let Z = weightMat x prevActivations
+let curActivations = [sigmoid(z) for z in Z]
+return curActivations
+
+getActivationVector
+inputs:
+layer
+outputs:
+activations
+
+return [[node.value] for node in layer.nodes]
+
+forwardPropogation
+(version where the animation happens at the same time as the calculations)
+inputs:
+network
+outputs: none
+//this function assumes the given network already has inputs. this cannot be validated, as there is every chance that the network could've been inputted with all 0s.
+// this function will not include putting inputs into the network, as that is a fundamentally different process from forward propogation.
+
+for i=1 of network.length:
+    layer = network[i]
+    prevLayer = network[i-1]
+
+    weightMat = layer.weights
+    prevActivations = getActivationVector(prevLayer)
+
+    newActivations = array(calculateActivations(prevActivations, weightMat))
+
+    await func.animateLayer(network, newActivations, 1000, state.warpedTime, false, i)
+
+giveNetworkInputs
+inputs:
+network
+inputActivations [array]
+output: none (this function will include animation and is therefore not modular)
+
+func.animateLayer(network, inputActivations, 1000, state.warpedTime, false, 0)
+
+the sigmoid function
+input: z
+output: a
+return 1/ (1 = e^(-z))
+
+mapTo2DTensor
+inputs:
+inputTensor, func
+outputs:
+newTensor
+
+// throw error if inputTensor.shape does not contain 2 elements
+if inputTensor.shape.length !== 2 throw error
+
+let original = tf.tensor([[1, 2, 3], [4, 5, 6]])
+const square = (x) => x**2
+let originalSquare = []
+let originalArray = await original.array()
+console.log(originalArray)
+for (let row of originalArray) {
+    originalSquare.push(row.map(square))
+}
+let originalSquareTensor = tf.tensor(originalSquare)
+originalSquareTensor.print()
+
+createBiasVector
+input:
+bias (number)
+vectorHeight (integer)
+output: biasVector (tensor)
+
+let biasVector = []
+for i of vectorHeight:
+    biasVector.push([bias,])
+return tf.tensor(biasVector)
