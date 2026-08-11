@@ -9,37 +9,37 @@ Math.random = () => 0
 // test createLayer
 test('createLayer()', () => {
     // normal conditions
-    expect(func.createLayer(3, false, 2)).toEqual({
+    expect(func.createLayer(3)).toEqual({
         nodes: [{value: 0}, {value: 0}, {value: 0}],
-        inputLayer: false,
-        prevLayerIndex: 2,
+        // inputLayer: false,
+        // prevLayerIndex: 2,
         weightMatrix: null,
         bias: null
     })
 
     // input layer
-    expect(func.createLayer(3, true)).toEqual({
-        nodes: new Array(3).fill().map(() => {return {value: 0}}),
-        inputLayer: true,
-        prevLayerIndex: null,
-        weightMatrix: null,
-        bias: null
-    })
+    // expect(func.createLayer(3, true)).toEqual({
+    //     nodes: new Array(3).fill().map(() => {return {value: 0}}),
+    //     inputLayer: true,
+    //     prevLayerIndex: null,
+    //     weightMatrix: null,
+    //     bias: null
+    // })
 
     // input layer with given prevLayerIndex
-    expect(func.createLayer(3, true, 2)).toEqual({
-        nodes: new Array(3).fill().map(() => {return {value: 0}}),
-        inputLayer: true,
-        prevLayerIndex: null,
-        weightMatrix: null,
-        bias: null
-    })
+    // expect(func.createLayer(3, true, 2)).toEqual({
+    //     nodes: new Array(3).fill().map(() => {return {value: 0}}),
+    //     inputLayer: true,
+    //     prevLayerIndex: null,
+    //     weightMatrix: null,
+    //     bias: null
+    // })
 
     // zero nodes?
     expect(func.createLayer(0, true)).toEqual({
         nodes: [],
-        inputLayer: true,
-        prevLayerIndex: null,
+        // inputLayer: true,
+        // prevLayerIndex: null,
         weightMatrix: null,
         bias: null
     })
@@ -47,25 +47,25 @@ test('createLayer()', () => {
 
 test('createNetwork()', () => {
     // normal conditions
-    expect(func.createNetwork([2, 2, 2])).toEqual([
+    expect(func.createNetwork([2, 3, 2])).toEqual([
         {
             nodes: [{value: 0}, {value: 0}],
-            inputLayer: true,
-            prevLayerIndex: null,
+            // inputLayer: true,
+            // prevLayerIndex: null,
+            weightMatrix: null,
+            bias: null
+        },
+        {
+            nodes: [{value: 0}, {value: 0}, {value: 0}],
+            // inputLayer: false,
+            // prevLayerIndex: 0,
             weightMatrix: null,
             bias: null
         },
         {
             nodes: [{value: 0}, {value: 0}],
-            inputLayer: false,
-            prevLayerIndex: 0,
-            weightMatrix: null,
-            bias: null
-        },
-        {
-            nodes: [{value: 0}, {value: 0}],
-            inputLayer: false,
-            prevLayerIndex: 1,
+            // inputLayer: false,
+            // prevLayerIndex: 1,
             weightMatrix: null,
             bias: null
         }

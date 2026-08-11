@@ -1,11 +1,11 @@
 import * as tf from '@tensorflow/tfjs';
 
-export function createLayer(numNodes, inputLayer=true, prevLayerIndex=null) {
+export function createLayer(numNodes) {
     let layer = {
         nodes: new Array(numNodes).fill().map(() => {return {value: 0}}), // array of objects
         // will check later if this has any referencing issues which i get the gut feeling it does
-        inputLayer,
-        prevLayerIndex: inputLayer? null: prevLayerIndex,
+        // inputLayer,
+        // prevLayerIndex: inputLayer? null: prevLayerIndex,
         weightMatrix: null,
         bias: null
     }
@@ -18,16 +18,16 @@ export function createNetwork(dimensions) {
 
     for (let i=0; i<dimensions.length; i++) {
         let numNodes = dimensions[i]
-        let inputLayer = (i === 0) // determines if it's input layer or not
+        // let inputLayer = (i === 0) // determines if it's input layer or not
 
-        network.push(createLayer(numNodes, inputLayer, i-1))
+        network.push(createLayer(numNodes))
     }
 
     return network
 }
 
-export function initWeightBiasLayer(numNodes, prevNumNodes, inputLayer) {
-    if (inputLayer) {throw new Error("Input layer does not have a weight matrix or a bias")}
+export function initWeightBiasLayer(numNodes, prevNumNodes, isInputLayer) {
+    if (isInputLayer) {throw new Error("Input layer does not have a weight matrix or a bias")}
     // input validation for input layers just in case
 
     let weightMatrix = []
@@ -43,10 +43,11 @@ export function initWeightBiasNetwork(network) {
     let newNetwork = structuredClone(network)
 
     for (let i=1; i<newNetwork.length; i++) {
+        // start looping from 1 because input layer does not have weight matrix or bias
         let layer = newNetwork[i]
         let prevLayer = newNetwork[i-1]
 
-        let weightMatrix, bias = initWeightBiasLayer(layer.nodes.length, prevLayer.nodes.length, layer.inputLayer)
+        let weightMatrix, bias = initWeightBiasLayer(layer.nodes.length, prevLayer.nodes.length, i === 0)
         layer.weightMatrix = weightMatrix
         layer.bias = bias
     }
