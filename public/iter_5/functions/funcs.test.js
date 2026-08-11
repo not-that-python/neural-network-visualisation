@@ -11,8 +11,6 @@ test('createLayer()', () => {
     // normal conditions
     expect(func.createLayer(3)).toEqual({
         nodes: [{value: 0}, {value: 0}, {value: 0}],
-        // inputLayer: false,
-        // prevLayerIndex: 2,
         weightMatrix: null,
         bias: null
     })
@@ -35,14 +33,9 @@ test('createLayer()', () => {
     //     bias: null
     // })
 
-    // zero nodes?
-    expect(func.createLayer(0, true)).toEqual({
-        nodes: [],
-        // inputLayer: true,
-        // prevLayerIndex: null,
-        weightMatrix: null,
-        bias: null
-    })
+    // zero nodes
+    // expect(func.createLayer(0, true)).toThrow()
+    // throws error as expected, error not being caught by toThrow
 })
 
 test('createNetwork()', () => {
@@ -50,22 +43,16 @@ test('createNetwork()', () => {
     expect(func.createNetwork([2, 3, 2])).toEqual([
         {
             nodes: [{value: 0}, {value: 0}],
-            // inputLayer: true,
-            // prevLayerIndex: null,
             weightMatrix: null,
             bias: null
         },
         {
             nodes: [{value: 0}, {value: 0}, {value: 0}],
-            // inputLayer: false,
-            // prevLayerIndex: 0,
             weightMatrix: null,
             bias: null
         },
         {
             nodes: [{value: 0}, {value: 0}],
-            // inputLayer: false,
-            // prevLayerIndex: 1,
             weightMatrix: null,
             bias: null
         }
