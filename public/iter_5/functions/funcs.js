@@ -4,7 +4,7 @@ export function createLayer(numNodes) {
     if (numNodes === 0) {throw new Error("A layer cannot have zero nodes")}
 
     let layer = {
-        nodes: new Array(numNodes).fill().map(() => {return {value: 0}}), // array of objects
+        nodes: new Array(numNodes).fill().map(() => {return {value: 0, x: null, y: null}}), // array of objects
         // will check later if this has any referencing issues which i get the gut feeling it does
         weightMatrix: null,
         bias: null
