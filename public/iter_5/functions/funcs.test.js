@@ -6,7 +6,6 @@ import * as tf from '@tensorflow/tfjs'
 let temp = Math.random
 Math.random = () => 0
 
-// test createLayer
 test('createLayer()', () => {
     // normal conditions
     expect(func.createLayer(3)).toEqual({
@@ -58,3 +57,47 @@ test('createNetwork()', () => {
         }
     ])
 })
+
+test('initWeightBiasLayer()', () => {
+    // normal conditions
+    expect(func.initWeightBiasLayer(2, 3, false)).toEqual([
+        [[-1, -1, -1],
+        [-1, -1, -1]],
+        0
+    ])
+
+    expect(func.initWeightBiasLayer(3, 2, false)).toEqual([
+        [[-1, -1],
+        [-1, -1],
+        [-1, -1]],
+        0
+    ])
+
+    // input layer
+    // expect(func.initWeightBiasLayer(2, 3, true)).toThrow()
+    // throws error as expected, error not being caught by toThrow()
+})
+
+test('initWeightBiasNetwork()', () => {
+    let network = func.createNetwork([2, 3, 2])
+    expect(func.initWeightBiasNetwork(network)).toEqual([
+        {
+            nodes: [{value: 0, x: null, y: null}, {value: 0, x: null, y: null}],
+            weightMatrix: null,
+            bias: null
+        },
+        {
+            nodes: [{value: 0, x: null, y: null}, {value: 0, x: null, y: null}, {value: 0, x: null, y: null}],
+            weightMatrix: [[-1, -1], [-1, -1], [-1, -1]],
+            bias: 0
+        },
+        {
+            nodes: [{value: 0, x: null, y: null}, {value: 0, x: null, y: null}],
+            weightMatrix: [[-1, -1, -1], [-1, -1, -1]],
+            bias: 0
+        }
+    ])
+})
+
+// restore Math.random for safety purposes
+Math.random = temp

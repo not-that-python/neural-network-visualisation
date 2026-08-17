@@ -29,12 +29,17 @@ export function initWeightBiasLayer(numNodes, prevNumNodes, isInputLayer) {
     // input validation for input layers just in case
 
     let weightMatrix = []
-    for (let i=0; i<numNodes; i++) {weightMatrix[i] = []} // first rows (height)
-    for (let j=0; j<numNodes; j++) {weightMatrix[i][j] = (Math.random()*2)-1} // then values (width)
+    for (let i=0; i<numNodes; i++) {
+        weightMatrix[i] = [] // first rows (height)
+        for (let j=0; j<prevNumNodes; j++) {
+            weightMatrix[i][j] = (Math.random()*2)-1 // then values (width)
+        } 
+    } 
+    
     // we'll see if there are referencing errors later or not, I don't think there will be
 
     let bias = 0
-    return weightMatrix, bias
+    return [weightMatrix, bias]
 }
 
 export function initWeightBiasNetwork(network) {
@@ -45,7 +50,7 @@ export function initWeightBiasNetwork(network) {
         let layer = newNetwork[i]
         let prevLayer = newNetwork[i-1]
 
-        let weightMatrix, bias = initWeightBiasLayer(layer.nodes.length, prevLayer.nodes.length, i === 0)
+        let [weightMatrix, bias] = initWeightBiasLayer(layer.nodes.length, prevLayer.nodes.length, i === 0)
         layer.weightMatrix = weightMatrix
         layer.bias = bias
     }
